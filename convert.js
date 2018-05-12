@@ -9,7 +9,7 @@ const ffmpeg = require('@ffmpeg-installer/ffmpeg');
 // https://git.io/vpSrn
 const ffmpegPath = util.fixPathForAsarUnpack(ffmpeg.path);
 
-const convert = (args, outputPath) => {
+const convert = (args, outputPath, logger) => {
   return new Promise((resolve, reject) => {
     // Add output path to args.
     args.push(outputPath);
@@ -18,9 +18,11 @@ const convert = (args, outputPath) => {
     const converter = execa(ffmpegPath, args);
 
     // Log progress from ffmpeg.
+    let stderr = '';
     converter.stderr.setEncoding('utf8');
     converter.stderr.on('data', data => {
-      console.log(data);
+      stderr += data;
+      logger(stderr);
     });
 
     // Reject promise on ffmpeg error.

@@ -3,11 +3,27 @@ const electron = require('electron');
 const app = electron.app;
 // Module to create native browser window.
 const BrowserWindow = electron.BrowserWindow;
+const ipcMain = electron.ipcMain;
 
 const path = require('path');
 const url = require('url');
 
 const convert = require('./convert');
+
+ipcMain.on('converter', (event, arg) => {
+  if (arg === 'START') {
+    // Basic ffmpeg operation.
+    // Combining a video with an audio file.
+    const video = 'https://v.redd.it/vh8l6199v9x01/DASH_4_8_M';
+    const audio = 'https://v.redd.it/vh8l6199v9x01/audio';
+
+    convert(
+      ['-i', video, '-i', audio],
+      `${app.getPath('downloads')}/converted.mp4`,
+      data => event.sender.send('log', data)
+    );
+  }
+});
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -25,17 +41,6 @@ function createWindow() {
       slashes: true,
     })
   );
-
-  // Basic ffmpeg operation.
-  // Combining a video with an audio file.
-  const video = 'https://v.redd.it/vh8l6199v9x01/DASH_4_8_M';
-  const audio = 'https://v.redd.it/vh8l6199v9x01/audio';
-
-  // prettier-ignore
-  convert([
-    '-i', video,
-    '-i', audio,
-  ], `${app.getPath('downloads')}/converted.mp4`);
 
   // Open the DevTools.
   // mainWindow.webContents.openDevTools()
